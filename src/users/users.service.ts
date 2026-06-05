@@ -1,0 +1,81 @@
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Injectable()
+export class UsersService {
+
+    private users = [
+        {
+            "id": 1,
+            "name": "Marlon Ribas",
+            "email": "marlon.ribas@example.com",
+            "role": "tourist"
+        },
+        {
+            "id": 2,
+            "name": "Karla Sofia",
+            "email": "karla.sofia@example.com",
+            "role": "tourist"
+        },
+        {
+            "id": 3,
+            "name": "Sonia Costa",
+            "email": "sonia.costa@example.com",
+            "role": "local"
+        },
+        {
+            "id": 4,
+            "name": "Karla Sofia",
+            "email": "karla.sofia@example.com",
+            "role": "tourist"
+        },
+        {
+            "id": 5,
+            "name": "Carlos Silva",
+            "email": "carlos.silva@example.com",
+            "role": "local"
+        }
+    ];
+
+    findAll(role?: 'tourist' | 'local') {
+        if (role) {
+            return this.users.filter(user => user.role === role);
+        }
+        return this.users;
+    }
+
+    findOne(id: number) {
+        const user = this.users.find(user => user.id === id);
+        if (!user) {
+            throw new Error(`User with id ${id} not found`);
+        }
+        return user;
+    }
+
+    create(createUserDto: CreateUserDto) {
+        const newUser = {
+            id: this.users.length + 1,
+            ...createUserDto
+        };
+        this.users.push(newUser);
+        return newUser;
+    }
+
+    updatePartial(id: number, updateUserDto: UpdateUserDto) {
+        const user = this.findOne(id);
+        const updatedUser = { ...user, ...updateUserDto };
+        const index = this.users.findIndex(user => user.id === id);
+        this.users[index] = updatedUser;
+        return updatedUser;
+    }
+
+    remove(id: number) {
+        const index = this.users.findIndex(user => user.id === id);
+        if (index === -1) {
+            throw new Error(`User with id ${id} not found`);
+        }
+        const removedUser = this.users.splice(index, 1);
+        return removedUser[0];
+    }
+}

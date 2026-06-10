@@ -7,7 +7,7 @@ export enum Reason {
     SPAM = 'spam',
     OFFENSIVE = 'offensive',
     FAKE_INFORMATION = 'fake_information',
-    HARASSMENT = 'harassment'
+    HARASSMENT = 'harassment',
     OTHER = 'other'
 }
 

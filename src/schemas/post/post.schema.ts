@@ -45,4 +45,9 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
-PostSchema.index({ 'location.coordinates': '2dsphere' }); // oq eh isso
+PostSchema.index({ 'location.coordinates': '2dsphere' });
+PostSchema.index({ createdAt: -1 });
+PostSchema.index({ typeTag: 1, createdAt: -1 });
+PostSchema.index({ 'location.city': 1, 'location.country': 1 });
+PostSchema.index({ 'location.placeId': 1, createdAt: -1 });
+PostSchema.index({ 'user.id': 1, createdAt: -1 });

@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import { Post } from '../post/post.schema';
 import { CommentUser, CommentUserSchema } from './commentuser.schema';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: { createdAt: true, updatedAt: true } }) // Ver se precisa do updatedAt
 export class Comment {
     @Prop({
         type: Types.ObjectId,
@@ -20,3 +20,4 @@ export class Comment {
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
+CommentSchema.index({ postId: 1, createdAt: 1 });

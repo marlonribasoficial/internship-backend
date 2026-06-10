@@ -9,8 +9,8 @@ export class CommentUser {
   @Prop({ required: true })
   nickname: string;
 
-  @Prop({ default: null })
-  photoUrl: string;
+  @Prop()
+  photoUrl?: string;
 }
 
 export const CommentUserSchema = SchemaFactory.createForClass(CommentUser);

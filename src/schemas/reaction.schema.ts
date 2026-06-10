@@ -8,16 +8,17 @@ export enum Type {
     DISLIKE = 'dislike'
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: { createdAt: true, updatedAt: false } })
 export class Reaction {
-    @Prop({ type: UserSchema, required: true })
-    user: User;
+  @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
+  postId: Types.ObjectId;
 
-    @Prop({ type: PostSchema, required: true })
-    post: Post;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
 
-    @Prop({ type: String, enum: Type, required: true })
-    type: Type;
+  @Prop({ type: String, enum: Type, required: true })
+  type: Type;
 }
 
 export const ReactionSchema = SchemaFactory.createForClass(Reaction);
+ReactionSchema.index({ postId: 1, userId: 1 }, { unique: true });

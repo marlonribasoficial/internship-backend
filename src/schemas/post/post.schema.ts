@@ -13,7 +13,7 @@ export enum TypeTag {
     EXPERIENCE = 'experience',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: { createdAt: true, updatedAt: true } })
 export class Post {
     @Prop({ type: PostUserSchema, required: true })
     user: PostUser;
@@ -27,7 +27,7 @@ export class Post {
     @Prop({ required: true, enum: TypeTag }) // Ver se é uma opcão por post
     typeTag: TypeTag;
 
-    @Prop({ required: true, min: 0, max: 5 })
+    @Prop({ required: true, min: 0, max: 5, validate: { validator: Number.isInteger } })
     rating: number; // Ver se ser de 0 a 5 mesmo
 
     @Prop({ type: [MediaSchema], default: [] })

@@ -9,8 +9,8 @@ export class PostUser {
   @Prop({ required: true })
   nickname: string;
 
-  @Prop({ default: null })
-  photoUrl: string;
+  @Prop()
+  photoUrl?: string;
 
   @Prop({ default: null })
   country: string;

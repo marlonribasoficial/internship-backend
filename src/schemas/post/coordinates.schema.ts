@@ -5,8 +5,8 @@ export class Coordinates {
   @Prop({ type: String, enum: ['Point'], default: 'Point' })
   type: string;
 
-  @Prop({ type: [Number], required: true })
-  coordinates: number[];
+  @Prop({ type: [Number], required: true, validate: { validator: (v: number[]) => v.length === 2 } })
+  coordinates: [number, number];
 }
 
 export const CoordinatesSchema = SchemaFactory.createForClass(Coordinates);

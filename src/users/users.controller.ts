@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Put, Delete, Param, Body, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, Query, ParseIntPipe, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -22,19 +22,19 @@ export class UsersController {
     }
 
     @Post() // POST /users - para criar um novo usuário
-    create(@Body() createUserDto: CreateUserDto) {
+    create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
         // lógica para criar um novo usuário
         return this.usersService.create(createUserDto);
     }
 
     @Patch(':id') // PATCH /users/:id - para atualizar parcialmente um usuário existente por ID
-    updatePartial(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+    updatePartial(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) updateUserDto: UpdateUserDto) {
         // lógica para atualizar parcialmente um usuário existente por ID
         return this.usersService.updatePartial(id, updateUserDto);
     }
 
     // @Put(':id') // PUT /users/:id - para atualizar um usuário existente por ID
-    // update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+    // update(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) updateUserDto: UpdateUserDto) {
     //     // lógica para atualizar um usuário existente por ID
     // }
 

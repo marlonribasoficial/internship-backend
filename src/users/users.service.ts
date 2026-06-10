@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../schemas/user.schema';
 
 @Injectable()
 export class UsersService {
+
+    constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
     private users = [
         {
@@ -40,16 +46,16 @@ export class UsersService {
 
     findAll(role?: 'tourist' | 'local') {
         if (role) {
-            return this.users.filter(user => user.role === role);
+            const rolesArray = this.users.filter(user => user.role === role);
+            if (!rolesArray.length) throw new NotFoundException(`No users with role ${role} found`);
+            return rolesArray;
         }
         return this.users;
     }
 
     findOne(id: number) {
         const user = this.users.find(user => user.id === id);
-        if (!user) {
-            throw new Error(`User with id ${id} not found`);
-        }
+        if (!user) throw new NotFoundException(`User with id ${id} not found`);
         return user;
     }
 
@@ -72,9 +78,7 @@ export class UsersService {
 
     remove(id: number) {
         const index = this.users.findIndex(user => user.id === id);
-        if (index === -1) {
-            throw new Error(`User with id ${id} not found`);
-        }
+        if (index === -1) throw new NotFoundException(`User with id ${id} not found`);
         const removedUser = this.users.splice(index, 1);
         return removedUser[0];
     }

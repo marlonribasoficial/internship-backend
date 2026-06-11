@@ -12,7 +12,7 @@ export class PostUser {
   @Prop()
   photoUrl?: string;
 
-  @Prop({ default: null })
+  @Prop({ required: true })
   country: string;
 }
 

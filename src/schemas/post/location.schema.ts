@@ -9,17 +9,18 @@ export class Location {
     @Prop({ required: true })
     name: string;
 
+    // Todos campos abaixos inferi que são opcionais
     @Prop()
-    city: string;
+    city?: string;
 
     @Prop()
-    state: string;
+    state?: string;
 
     @Prop()
-    country: string;
+    country?: string;
 
     @Prop()
-    address: string;
+    address?: string;
 
     @Prop({ type: CoordinatesSchema, required: true})
     coordinates: Coordinates;

@@ -1,7 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { Post, PostSchema } from './post/post.schema';
-import { User, UserSchema } from './user.schema';
 
 export enum Reason {
     SPAM = 'spam',
@@ -22,8 +20,8 @@ export class Report {
   @Prop({ type: String, enum: Reason, required: true })
   reason: Reason;
 
-  @Prop({ default: null })
-  description: string;
+  @Prop()
+  description?: string;
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);

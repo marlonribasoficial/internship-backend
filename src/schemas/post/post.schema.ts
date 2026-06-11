@@ -10,7 +10,7 @@ export enum TypeTag {
     WARNING = 'warning',
     REVIEW = 'review',
     QUESTION = 'question',
-    EXPERIENCE = 'experience',
+    EXPERIENCE = 'experience'
 }
 
 @Schema({ timestamps: { createdAt: true, updatedAt: true } })
@@ -27,11 +27,11 @@ export class Post {
     @Prop({ required: true, enum: TypeTag }) // Ver se é uma opcão por post
     typeTag: TypeTag;
 
-    @Prop({ required: true, min: 0, max: 5, validate: { validator: Number.isInteger } })
-    rating: number; // Ver se ser de 0 a 5 mesmo
+    @Prop({ min: 0, max: 5, validate: { validator: Number.isInteger } })
+    rating?: number;
 
-    @Prop({ type: [MediaSchema], default: [] })
-    media: Media[]; // Array de mídias associadas ao post
+    @Prop({ type: [MediaSchema] })
+    media?: Media[]; // Array de mídias associadas ao post
 
     @Prop({ required: true })
     language: string;

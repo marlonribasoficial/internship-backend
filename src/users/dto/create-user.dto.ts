@@ -1,15 +1,43 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNotEmpty, IsString, IsUrl, IsOptional, MinLength, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateUserDto {
     @IsString()
     @IsNotEmpty()
+    @MinLength(3)
+    @MaxLength(100)
     name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(3)
+    @MaxLength(30)
+    nickname: string;
 
     @IsEmail()
     @IsNotEmpty()
     email: string;
 
-    @IsEnum(['tourist', 'local'], { message: 'Role must be either tourist or local' })
+    @IsString()
     @IsNotEmpty()
-    role: 'tourist' | 'local';
+    @MinLength(6)
+    hashedPassword: string;
+
+
+    @Type(() => Date)
+    @IsDate()
+    @IsNotEmpty()
+    birthDate: Date;
+
+    @IsOptional()
+    @IsUrl()
+    photoUrl?: string;
+
+    @IsOptional()
+    @IsString()
+    bio?: string;
+
+    @IsOptional()
+    @IsString()
+    country?: string;
 }

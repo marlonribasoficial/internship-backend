@@ -1,7 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { Post, PostSchema } from './post/post.schema';
-import { User, UserSchema } from './user.schema';
 
 export enum Type {
     LIKE = 'like',

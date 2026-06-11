@@ -3,13 +3,9 @@ import { Types } from 'mongoose';
 import { Post } from '../post/post.schema';
 import { CommentUser, CommentUserSchema } from './commentuser.schema';
 
-@Schema({ timestamps: { createdAt: true, updatedAt: true } }) // Ver se precisa do updatedAt
+@Schema({ timestamps: { createdAt: true, updatedAt: false } })
 export class Comment {
-    @Prop({
-        type: Types.ObjectId,
-        ref: Post.name,
-        required: true,
-    })
+    @Prop({ type: Types.ObjectId, ref: Post.name, required: true })
     postId: Types.ObjectId;
 
     @Prop({ type: CommentUserSchema, required: true })

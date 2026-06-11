@@ -14,16 +14,16 @@ export class User {
     @Prop({ required: true })
     hashedPassword: string;
 
-    @Prop({ default: null })
+    @Prop({ required: true })
     birthDate: Date;
 
-    @Prop({ default: null })
-    photoUrl: string;
+    @Prop()
+    photoUrl?: string;
 
-    @Prop({ default: null })
-    bio: string;
+    @Prop()
+    bio?: string;
 
-    @Prop({ default: null })
+    @Prop({ required: true })
     country: string;
 }
 

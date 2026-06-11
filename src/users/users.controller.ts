@@ -2,6 +2,8 @@ import { Controller, Get, Post, Patch, Put, Delete, Param, Body, Query, ParseInt
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+import mongoose from 'mongoose';
 
 @Controller('users') // isso cuida de todas as rotas relacionadas a usuários, como /users, /users/:id, etc.
 export class UsersController {
@@ -14,39 +16,35 @@ export class UsersController {
         return this.usersService.create(createUserDto);
     }
 
-    // @Get() // GET /users - para obter uma lista de usuários
-    // // É possível usar o @Query() para obter parâmetros de consulta, como ?page=1&limit=10
-    // findAll(@Query('role') role?: 'tourist' | 'local') {
-    //     // lógica para obter todos os usuários
-    //     return this.usersService.findAll(role);
-    // }
+    @Get()
+    getUsers() {
+        return this.usersService.getUsers();
+    }
 
-    // @Get(':id') // GET /users/:id - para obter um usuário específico por ID
-    // findOne(@Param('id', ParseIntPipe) id: number) {
-    //     // lógica para obter um usuário específico por ID
-    //     return this.usersService.findOne(id);
-    // }
+    @Get(':id')
+    async getUsersById(id: string) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new NotFoundException(`User with id ${id} not found`);
+        const findUser = await this.usersService.getUsersById(id);
+        if (!findUser) throw new NotFoundException(`User with id ${id} not found`);
+        return findUser;   
+    }
 
-    // @Post() // POST /users - para criar um novo usuário
-    // create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    //     // lógica para criar um novo usuário
-    //     return this.usersService.create(createUserDto);
-    // }
+    @Patch(':id')
+    async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
+        const updatedUser = await this.usersService.updateUser(id, updateUserDto);
+        if (!updatedUser) throw new NotFoundException(`User with id ${id} not found`);
+        return updatedUser;
+    }
 
-    // @Patch(':id') // PATCH /users/:id - para atualizar parcialmente um usuário existente por ID
-    // updatePartial(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) updateUserDto: UpdateUserDto) {
-    //     // lógica para atualizar parcialmente um usuário existente por ID
-    //     return this.usersService.updatePartial(id, updateUserDto);
-    // }
-
-    // @Put(':id') // PUT /users/:id - para atualizar um usuário existente por ID
-    // update(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) updateUserDto: UpdateUserDto) {
-    //     // lógica para atualizar um usuário existente por ID
-    // }
-
-    // @Delete(':id') // DELETE /users/:id - para excluir um usuário por ID
-    // remove(@Param('id', ParseIntPipe) id: number) {
-    //     // lógica para excluir um usuário por ID
-    //     return this.usersService.remove(id);
-    // }
+    @Delete(':id')
+    async deleteUser(@Param('id') id: string) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
+        const deletedUser = await this.usersService.deleteUser(id);
+        if (!deletedUser) throw new NotFoundException(`User with id ${id} not found`);
+        return;
+    }
 }

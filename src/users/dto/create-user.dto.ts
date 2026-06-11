@@ -23,7 +23,6 @@ export class CreateUserDto {
     @MinLength(6)
     hashedPassword: string;
 
-
     @Type(() => Date)
     @IsDate()
     @IsNotEmpty()
@@ -35,9 +34,10 @@ export class CreateUserDto {
 
     @IsOptional()
     @IsString()
+    @MaxLength(200)
     bio?: string;
 
-    @IsOptional()
     @IsString()
-    country?: string;
+    @IsNotEmpty()
+    country: string;
 }

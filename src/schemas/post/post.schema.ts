@@ -27,7 +27,7 @@ export class Post {
     @Prop({ required: true, enum: TypeTag }) // Ver se é uma opcão por post
     typeTag: TypeTag;
 
-    @Prop({ min: 0, max: 5, validate: { validator: Number.isInteger } })
+    @Prop({ min: 0, max: 5, validate: { validator: (value: number) => value % 0.5 === 0 } })
     rating?: number;
 
     @Prop({ type: [MediaSchema] })

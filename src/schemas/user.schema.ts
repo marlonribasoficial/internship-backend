@@ -11,8 +11,12 @@ export class User {
     @Prop({ required: true, unique: true })
     email: string;
 
-    @Prop({ required: true })
-    hashedPassword: string;
+    // ids dos provedores OAuth — sparse porque só existem para usuários OAuth
+    @Prop({ default: null, sparse: true })
+    appleId: string;
+
+    @Prop({ default: null, sparse: true })
+    googleId: string;
 
     @Prop({ required: true })
     birthDate: Date;
@@ -28,3 +32,9 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// Adicionei índices para garantir unicidade e melhorar a performance das consultas por email, nickname e ids dos provedores OAuth
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ nickname: 1 }, { unique: true });
+UserSchema.index({ appleId: 1 }, { unique: true, sparse: true });
+UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });

@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -24,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     PostsModule,
+    ScheduleModule.forRoot(),
     AuthModule,
   ],
   controllers: [AppController],

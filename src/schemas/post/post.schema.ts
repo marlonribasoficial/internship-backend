@@ -41,6 +41,12 @@ export class Post {
 
     @Prop({ type: StatsSchema, default: () => ({ likes: 0, dislikes: 0, comments: 0, reports: 0 }) })
     stats: Stats;
+
+    @Prop({ default: 0 })
+    trendingScore: number;
+
+    // Avisamos ao TypeScript que essa data existe (não precisa do @Prop aqui)
+    createdAt?: Date;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

@@ -18,8 +18,16 @@ export class PostsController {
     }
 
     @Get()
-    async getPosts() {
-        return await this.postsService.getPosts();
+    async getPosts(
+        // Pega os parâmetros da URL, ex: /posts?page=1&limit=10
+        @Query('page') page?: string, 
+        @Query('limit') limit?: string
+    ) {
+        // Converte os textos da URL para números, com valores padrão caso venham vazios
+        const numeroPagina = page ? parseInt(page, 10) : 1;
+        const limitePorPagina = limit ? parseInt(limit, 10) : 10;
+
+        return await this.postsService.getPosts(numeroPagina, limitePorPagina);
     }
 
     @Get(':id')

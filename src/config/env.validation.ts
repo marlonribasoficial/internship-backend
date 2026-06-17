@@ -30,4 +30,7 @@ export const envValidationSchema = Joi.object({
 
       return value;
     }),
+  JWT_SECRET: Joi.string().min(32).required(),
+  JWT_EXPIRES_IN: Joi.string().default('7d'),
+  APPLE_CLIENT_ID: Joi.string().required(),
 });

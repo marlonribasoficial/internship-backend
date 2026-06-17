@@ -7,6 +7,9 @@ export class CommentUser {
   id: Types.ObjectId;
 
   @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
   nickname: string;
 
   @Prop()

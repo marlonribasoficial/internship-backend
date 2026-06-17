@@ -1,19 +1,22 @@
-import { IsEmail, IsNotEmpty, IsString, IsUrl, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsUrl, IsOptional, ValidateIf } from 'class-validator';
 
 export class CreateOAuthUserDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsEmail()
-  email: string;
-
   @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ValidateIf(o => !o.googleId)
   @IsString()
+  @IsNotEmpty()
   appleId?: string;
 
-  @IsOptional()
+  @ValidateIf(o => !o.appleId)
   @IsString()
+  @IsNotEmpty()
   googleId?: string;
 
   @IsOptional()

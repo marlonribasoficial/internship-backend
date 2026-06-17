@@ -15,10 +15,10 @@ export class User {
   @Prop()
   hashedPassword: string;
 
-  @Prop({ default: null })
+  @Prop({ type: String, default: null })
   appleId?: string | null;
 
-  @Prop({ default: null })
+  @Prop({ type: String, default: null })
   googleId?: string | null;
 
   @Prop()

@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, ParseIntPipe, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
 import mongoose from 'mongoose';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ProfileCompleteGuard } from 'src/auth/guards/profile-complete.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -11,10 +13,9 @@ export class PostsController {
     constructor(private readonly postsService: PostsService) {}
 
     @Post()
-    // Aqui eu colocaria o usuário como parâmetro quando eu tiver a autenticação implementada, por enquanto vou deixar hardcoded no service
-    async create(@Body() createPostDto: CreatePostDto) {
-        console.log(createPostDto)
-        return await this.postsService.create(createPostDto);
+    @UseGuards(JwtAuthGuard, ProfileCompleteGuard)
+    async create(@CurrentUser() user: { sub: string }, @Body() createPostDto: CreatePostDto) {
+        return await this.postsService.create(createPostDto, user.sub);
     }
 
     @Get()
@@ -40,22 +41,19 @@ export class PostsController {
     }
 
     @Patch(':id')
-    async updatePost(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    @UseGuards(JwtAuthGuard, ProfileCompleteGuard)
+    async updatePost(@CurrentUser() user: { sub: string }, @Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
-        const updatedPost = await this.postsService.updatePost(id, updatePostDto);
-        if (!updatedPost) throw new NotFoundException(`Post with id ${id} not found`);
-        return updatedPost;
+        return this.postsService.updatePost(id, updatePostDto, user.sub);
     }
 
     @Delete(':id')
-    async deletePost(@Param('id') id: string) {
+    @UseGuards(JwtAuthGuard, ProfileCompleteGuard)
+    async deletePost(@CurrentUser() user: { sub: string }, @Param('id') id: string) {
         const isValid = mongoose.Types.ObjectId.isValid(id);
         if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
-        const deletedPost = await this.postsService.deletePost(id);
-        if (!deletedPost) throw new NotFoundException(`Post with id ${id} not found`);
-        return {
-            message: 'Post deleted successfully',
-        };
+        await this.postsService.deletePost(id, user.sub);
+        return { message: 'Post deleted successfully' };
     }
 }

@@ -1,11 +1,13 @@
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateCoordinatesDto } from './create-coordinates.dto';
 
 export class CreateLocationDto {
+  @IsNotEmpty()
   @IsString()
   placeId: string;
 
+  @IsNotEmpty()
   @IsString()
   name: string;
 
@@ -25,6 +27,7 @@ export class CreateLocationDto {
   @IsString()
   address?: string;
 
+  @IsNotEmpty()
   @ValidateNested()
   @Type(() => CreateCoordinatesDto)
   coordinates: CreateCoordinatesDto;

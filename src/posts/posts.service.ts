@@ -49,8 +49,13 @@ export class PostsService {
         const likes = post.stats?.likes || 0; 
         
         // Atualiza a nota (que agora existe no Schema) e salva
-        post.trendingScore = likes / Math.pow((safeAge + 2), gravity);
-        await post.save(); 
+        const novaNota = likes / Math.pow((safeAge + 2), gravity);
+        
+        // Atualiza SÓ a nota direto no banco, ignorando se o resto do post está incompleto
+        await this.postModel.updateOne(
+            { _id: post._id }, 
+            { $set: { trendingScore: novaNota } }
+        );
     }
     console.log('Todos os scores foram atualizados com sucesso!');
   }

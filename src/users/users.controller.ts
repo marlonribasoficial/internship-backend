@@ -1,20 +1,11 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  NotFoundException,
-  BadRequestException,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Body, NotFoundException, UseGuards } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ProfileCompleteGuard } from 'src/auth/guards/profile-complete.guard';
 
 @Controller('users')
 export class UsersController {
@@ -28,12 +19,9 @@ export class UsersController {
     return foundUser;
   }
 
-  @Patch('me/profile')
+  @Patch('me/complete-profile')
   @UseGuards(JwtAuthGuard)
-  completeProfile(
-    @CurrentUser() user: { sub: string },
-    @Body() dto: CompleteProfileDto,
-  ) {
+  completeProfile(@CurrentUser() user: { sub: string }, @Body() dto: CompleteProfileDto) {
     return this.usersService.completeProfile(user.sub, dto);
   }
 
@@ -51,21 +39,17 @@ export class UsersController {
     return findUser;
   }
 
-  @Patch(':id')
-  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const isValid = mongoose.Types.ObjectId.isValid(id);
-    if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
-    const updatedUser = await this.usersService.updateUser(id, updateUserDto);
-    if (!updatedUser) throw new NotFoundException(`User with id ${id} not found`);
-    return updatedUser;
+  @Patch('me')
+  @UseGuards(JwtAuthGuard, ProfileCompleteGuard)
+  async updateUser(@CurrentUser() user: { sub: string }, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateUser(user.sub, dto);
   }
 
-  @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    const isValid = mongoose.Types.ObjectId.isValid(id);
-    if (!isValid) throw new BadRequestException(`Invalid id: ${id}`);
-    const deletedUser = await this.usersService.deleteUser(id);
-    if (!deletedUser) throw new NotFoundException(`User with id ${id} not found`);
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  async deleteUser(@CurrentUser() user: { sub: string }) {
+    const deletedUser = await this.usersService.deleteUser(user.sub);
+    if (!deletedUser) throw new NotFoundException(`User not found`);
     return;
   }
 }

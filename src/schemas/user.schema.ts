@@ -12,6 +12,9 @@ export class User {
   @Prop()
   email?: string;
 
+  @Prop()
+  hashedPassword: string;
+
   @Prop({ default: null })
   appleId?: string | null;
 
@@ -29,9 +32,6 @@ export class User {
 
   @Prop()
   country?: string;
-
-  @Prop({ default: false })
-  isProfileComplete: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

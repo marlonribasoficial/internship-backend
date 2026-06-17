@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     return {
       sub: user._id.toString(),
-      isProfileComplete: user.isProfileComplete,
+      isProfileComplete: !!(user.nickname && user.birthDate && user.country),
     };
   }
 }

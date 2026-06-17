@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString, MaxDate, MaxLength, MinLength } from 'class-validator';
+import { IsDate, IsNotEmpty, IsOptional, IsString, IsUrl, MaxDate, MaxLength, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CompleteProfileDto {
@@ -12,6 +12,10 @@ export class CompleteProfileDto {
   @IsDate()
   @MaxDate(() => new Date(), { message: 'birthDate cannot be in the future' })
   birthDate: Date;
+
+  @IsOptional()
+  @IsUrl()
+  photoUrl?: string;
 
   @IsString()
   @IsNotEmpty()

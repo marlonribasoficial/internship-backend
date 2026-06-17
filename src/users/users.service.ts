@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OAuthProfile } from '../auth/interfaces/oauth-profile.interface';
@@ -45,22 +45,27 @@ export class UsersService {
       appleId: profile.appleId ?? null,
       googleId: profile.googleId ?? null,
       photoUrl: profile.photoUrl,
-      isProfileComplete: false,
     });
   }
 
   async completeProfile(userId: string, dto: CompleteProfileDto) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { ...dto, isProfileComplete: true },
-      { new: true, runValidators: true },
-    );
+    try {
+      const user = await this.userModel.findByIdAndUpdate(
+        userId,
+        { ...dto },
+        { new: true, runValidators: true },
+      );
 
-    if (!user) {
-      throw new NotFoundException(`User with id ${userId} not found`);
+      if (!user) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && (error as any).code === 11000) throw new ConflictException('Nickname already in use');
+      
+      throw error;
     }
-
-    return user;
   }
 
   getUsers() {
@@ -71,11 +76,17 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
-  updateUser(id: string, updateUserDto: UpdateUserDto) {
-    return this.userModel.findByIdAndUpdate(id, updateUserDto, {
-      new: true,
-      runValidators: true,
-    });
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      return await this.userModel.findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+        runValidators: true,
+      });
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && (error as any).code === 11000) throw new ConflictException('Nickname already in use');
+
+      throw error;
+    }
   }
 
   deleteUser(id: string) {

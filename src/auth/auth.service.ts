@@ -29,14 +29,16 @@ export class AuthService {
   }
 
   private buildAuthResponse(user: UserDocument): AuthResponse {
+    const isProfileComplete = !!(user.nickname && user.birthDate && user.country);
+
     const payload: JwtPayload = {
       sub: user._id.toString(),
-      isProfileComplete: user.isProfileComplete,
+      isProfileComplete,
     };
 
     return {
       accessToken: this.jwtService.sign(payload),
-      isProfileComplete: user.isProfileComplete,
+      isProfileComplete,
       user: {
         id: user._id.toString(),
         name: user.name,
@@ -44,7 +46,7 @@ export class AuthService {
         nickname: user.nickname,
         photoUrl: user.photoUrl,
         country: user.country,
-        isProfileComplete: user.isProfileComplete,
+        isProfileComplete,
       },
     };
   }

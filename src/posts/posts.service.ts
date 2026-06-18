@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { Post } from '../schemas/post/post.schema';
 import { Comment } from '../schemas/comment/comment.schema';
 import { Reaction } from '../schemas/reaction.schema';
+import { Report } from '../schemas/report.schema';
 import { Cron } from '@nestjs/schedule';
 import { UsersService } from '../users/users.service';
 
@@ -15,6 +16,7 @@ export class PostsService {
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @InjectModel(Reaction.name) private readonly reactionModel: Model<Reaction>,
+    @InjectModel(Report.name) private readonly reportModel: Model<Report>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -91,7 +93,7 @@ export class PostsService {
       this.postModel.findByIdAndDelete(id),
       this.commentModel.deleteMany({ postId: id }),
       this.reactionModel.deleteMany({ postId: id }),
-      // TODO: add reports.deleteMany({ postId: id }) when reports module is ready
+      this.reportModel.deleteMany({ postId: id }),
     ]);
   }
 

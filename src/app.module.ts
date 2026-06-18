@@ -6,8 +6,10 @@ import { AppService } from './app.service';
 import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
+import { ReactionsModule } from './reactions/reactions.module';
 
 @Module({
   imports: [
@@ -25,8 +27,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     PostsModule,
+    CommentsModule,
     ScheduleModule.forRoot(),
     AuthModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

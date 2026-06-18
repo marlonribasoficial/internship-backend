@@ -4,6 +4,7 @@ import { PostsService } from './posts.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from 'src/schemas/post/post.schema';
 import { Comment, CommentSchema } from 'src/schemas/comment/comment.schema';
+import { Reaction, ReactionSchema } from 'src/schemas/reaction.schema';
 import { UsersModule } from '../users/users.module';
 
 @Module({
@@ -11,6 +12,7 @@ import { UsersModule } from '../users/users.module';
     MongooseModule.forFeature([
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
+      { name: Reaction.name, schema: ReactionSchema },
     ]),
     UsersModule,
   ],

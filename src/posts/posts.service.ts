@@ -1,23 +1,23 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, ForbiddenException, forwardRef } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../schemas/post/post.schema';
-import { Comment } from '../schemas/comment/comment.schema';
-import { Reaction } from '../schemas/reaction.schema';
-import { Report } from '../schemas/report.schema';
-import { Cron } from '@nestjs/schedule';
+
 import { UsersService } from '../users/users.service';
+import { CommentsService } from '../comments/comments.service';
+import { ReactionsService } from '../reactions/reactions.service';
+import { ReportsService } from '../reports/reports.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
-    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
-    @InjectModel(Reaction.name) private readonly reactionModel: Model<Reaction>,
-    @InjectModel(Report.name) private readonly reportModel: Model<Report>,
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => CommentsService)) private readonly commentsService: CommentsService,
+    @Inject(forwardRef(() => ReactionsService)) private readonly reactionsService: ReactionsService,
+    @Inject(forwardRef(() => ReportsService)) private readonly reportsService: ReportsService,
   ) {}
 
   async create(createPostDto: CreatePostDto, userId: string) {
@@ -35,46 +35,12 @@ export class PostsService {
     return newPost.save();
   }
 
-  async getPosts(page: number = 1, limit: number = 10) {
-    const pularDocumentos = (page - 1) * limit;
-
-    return this.postModel.find()
-      .sort({ trendingScore: -1 }) // Ordena do maior score para o menor
-      .skip(pularDocumentos)       // Pula os posts das páginas anteriores
-      .limit(limit);               // Pega apenas a quantidade solicitada
-  }
-
-  @Cron('*/5 * * * * *')
-  async recalcularScoresBackground() {
-    console.log('Iniciando o recálculo do algoritmo de Trending...');
-    const posts = await this.postModel.find();
-    
-    const gravity = 1.8;
-    const agora = new Date().getTime();
-
-    for (const post of posts) {
-        // Pega a data que o Mongoose gerou e calcula a idade em horas
-        const dataCriacao = post.createdAt ? post.createdAt.getTime() : agora;
-        const idadeEmHoras = (agora - dataCriacao) / (1000 * 60 * 60);
-        const safeAge = Math.max(0, idadeEmHoras);
-        
-        // A CORREÇÃO ESTÁ AQUI: Puxando o caminho certo 'stats.likes'
-        const likes = post.stats?.likes || 0; 
-        
-        // Atualiza a nota (que agora existe no Schema) e salva
-        const novaNota = likes / Math.pow((safeAge + 2), gravity);
-        
-        // Atualiza SÓ a nota direto no banco, ignorando se o resto do post está incompleto
-        await this.postModel.updateOne(
-            { _id: post._id }, 
-            { $set: { trendingScore: novaNota } }
-        );
-    }
-    console.log('Todos os scores foram atualizados com sucesso!');
+  async getPosts(page: number, limit: number) {
+    return this.postModel.find().sort({ trendingScore: -1 }).skip((page - 1) * limit).limit(limit).lean();
   }
 
   async getPostById(id: string) {
-    return this.postModel.findById(id);
+    return this.postModel.findById(id).lean();
   }
 
   async updatePost(id: string, updatePostDto: UpdatePostDto, userId: string) {
@@ -91,9 +57,9 @@ export class PostsService {
 
     await Promise.all([
       this.postModel.findByIdAndDelete(id),
-      this.commentModel.deleteMany({ postId: id }),
-      this.reactionModel.deleteMany({ postId: id }),
-      this.reportModel.deleteMany({ postId: id }),
+      this.commentsService.deleteByPostId(id),
+      this.reactionsService.deleteByPostId(id),
+      this.reportsService.deleteByPostId(id),
     ]);
   }
 

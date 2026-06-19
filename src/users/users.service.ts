@@ -68,12 +68,14 @@ export class UsersService {
     }
   }
 
-  getUsers() {
-    return this.userModel.find();
+  private static readonly PUBLIC_FIELDS = '-hashedPassword -appleId -googleId -__v';
+
+  getUsers(page: number, limit: number) {
+    return this.userModel.find().select(UsersService.PUBLIC_FIELDS).skip((page - 1) * limit).limit(limit).lean();
   }
 
   getUsersById(id: string) {
-    return this.userModel.findById(id);
+    return this.userModel.findById(id).select(UsersService.PUBLIC_FIELDS).lean();
   }
 
   async updateUser(id: string, updateUserDto: UpdateUserDto) {

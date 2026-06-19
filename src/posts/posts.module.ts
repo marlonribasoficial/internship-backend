@@ -1,25 +1,26 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { TrendingService } from './trending.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from 'src/schemas/post/post.schema';
-import { Comment, CommentSchema } from 'src/schemas/comment/comment.schema';
-import { Reaction, ReactionSchema } from 'src/schemas/reaction.schema';
-import { Report, ReportSchema } from 'src/schemas/report.schema';
 import { UsersModule } from '../users/users.module';
+import { ReportsModule } from 'src/reports/reports.module';
+import { ReactionsModule } from 'src/reactions/reactions.module';
+import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Post.name, schema: PostSchema },
-      { name: Comment.name, schema: CommentSchema },
-      { name: Reaction.name, schema: ReactionSchema },
-      { name: Report.name, schema: ReportSchema },
     ]),
     UsersModule,
+    forwardRef(() => CommentsModule),
+    forwardRef(() => ReactionsModule),
+    forwardRef(() => ReportsModule),
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, TrendingService],
   exports: [PostsService],
 })
 export class PostsModule {}

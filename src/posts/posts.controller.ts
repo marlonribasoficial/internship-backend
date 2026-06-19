@@ -6,12 +6,15 @@ import mongoose from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ProfileCompleteGuard } from 'src/auth/guards/profile-complete.guard';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('posts')
 export class PostsController {
 
     constructor(private readonly postsService: PostsService) {}
 
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @Post()
     @UseGuards(JwtAuthGuard, ProfileCompleteGuard)
     async create(@CurrentUser() user: { sub: string }, @Body() createPostDto: CreatePostDto) {
@@ -19,16 +22,8 @@ export class PostsController {
     }
 
     @Get()
-    async getPosts(
-        // Pega os parâmetros da URL, ex: /posts?page=1&limit=10
-        @Query('page') page?: string, 
-        @Query('limit') limit?: string
-    ) {
-        // Converte os textos da URL para números, com valores padrão caso venham vazios
-        const numeroPagina = page ? parseInt(page, 10) : 1;
-        const limitePorPagina = limit ? parseInt(limit, 10) : 10;
-
-        return await this.postsService.getPosts(numeroPagina, limitePorPagina);
+    async getPosts(@Query() query: PaginationDto) {
+        return await this.postsService.getPosts(query.page, query.limit);
     }
 
     @Get(':id')

@@ -13,6 +13,10 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: true, // em produção, trocar pela URL real do frontend
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

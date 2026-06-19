@@ -1,18 +1,21 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, ConflictException, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Reaction, Type as ReactionType } from '../schemas/reaction.schema';
 import { PostsService } from 'src/posts/posts.service';
+import { MongoServerError } from 'mongodb';
 
 @Injectable()
 export class ReactionsService {
   constructor(
     @InjectModel(Reaction.name) private readonly reactionModel: Model<Reaction>,
-    private readonly postsService: PostsService,
+    @Inject(forwardRef(() => PostsService)) private readonly postsService: PostsService,
   ) {}
 
   // TODO: migrate to Option B — include myReaction in the post response via an optional JWT guard.
   // Option B eliminates this extra round-trip but requires forwardRef between PostsModule and ReactionsModule.
+  // essa função precisa ser chamada antes de retornar um post para o cliente, para incluir o tipo da reação do usuário logado (se houver)
+  // na resposta do post. Assim, o cliente pode mostrar o estado atual da reação (curtido/descurtido) sem precisar fazer uma requisição separada.
   async getMyReaction(postId: string, userId: string) {
     if (!Types.ObjectId.isValid(postId)) throw new BadRequestException('Invalid post id');
     const reaction = await this.reactionModel.findOne({ postId, userId });
@@ -27,32 +30,38 @@ export class ReactionsService {
 
     const existing = await this.reactionModel.findOne({ postId, userId });
 
+    // Mesmo tipo → remove a reação (toggle off)
     if (existing) {
       if (existing.type === type) {
-        // Mesmo tipo → remove a reação (toggle off)
-        await Promise.all([
-          this.reactionModel.findByIdAndDelete(existing._id),
-          this.postsService.updateStats(postId, type, -1),
-        ]);
+        await this.reactionModel.findByIdAndDelete(existing._id);
+        await this.postsService.updateStats(postId, type, -1);
         return { action: 'removed', type };
       }
 
       // Tipo diferente → troca like↔dislike
       const oldType = existing.type;
       existing.type = type;
-      await Promise.all([
-        existing.save(),
-        this.postsService.updateStats(postId, oldType, -1),
-        this.postsService.updateStats(postId, type, 1),
-      ]);
+      await existing.save();
+      await this.postsService.updateStats(postId, oldType, -1);
+      await this.postsService.updateStats(postId, type, 1);
       return { action: 'switched', from: oldType, to: type };
     }
 
     // Sem reação anterior → cria nova
-    await Promise.all([
-      this.reactionModel.create({ postId, userId, type }),
-      this.postsService.updateStats(postId, type, 1),
-    ]);
+    try {
+      await this.reactionModel.create({ postId, userId, type });
+      await this.postsService.updateStats(postId, type, 1);
+    } catch (error) {
+      if (error instanceof MongoServerError && error.code === 11000) {
+        throw new ConflictException('You already reacted to this post');
+      }
+      throw error;
+    }
     return { action: 'added', type };
+  }
+
+  async deleteByPostId(postId: string) {
+    if (!Types.ObjectId.isValid(postId)) throw new BadRequestException('Invalid post id');
+    return this.reactionModel.deleteMany({ postId });
   }
 }

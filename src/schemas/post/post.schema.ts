@@ -57,3 +57,4 @@ PostSchema.index({ typeTag: 1, createdAt: -1 });
 PostSchema.index({ 'location.city': 1, 'location.country': 1 });
 PostSchema.index({ 'location.placeId': 1, createdAt: -1 });
 PostSchema.index({ 'user.id': 1, createdAt: -1 });
+PostSchema.index({ trendingScore: -1 });

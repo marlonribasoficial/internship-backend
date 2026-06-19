@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Reaction, ReactionSchema } from '../schemas/reaction.schema';
 import { PostsModule } from '../posts/posts.module';
@@ -8,7 +8,7 @@ import { ReactionsService } from './reactions.service';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Reaction.name, schema: ReactionSchema }]),
-    PostsModule,
+    forwardRef(() => PostsModule),
   ],
   controllers: [ReactionsController],
   providers: [ReactionsService],

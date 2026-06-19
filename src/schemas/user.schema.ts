@@ -41,4 +41,14 @@ UserSchema.index({ nickname: 1 }, { unique: true, sparse: true });
 UserSchema.index({ appleId: 1 }, { unique: true, sparse: true });
 UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
+UserSchema.set('toJSON', {
+  transform: (_doc, ret) => {
+    delete ret.hashedPassword;
+    delete ret.appleId;
+    delete ret.googleId;
+    delete ret.__v;
+    return ret;
+  },
+});
+
 export type UserDocument = HydratedDocument<User>;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Report } from '../schemas/report.schema';
@@ -9,7 +9,7 @@ import { CreateReportDto } from './dto/create-report.dto';
 export class ReportsService {
   constructor(
     @InjectModel(Report.name) private readonly reportModel: Model<Report>,
-    private readonly postsService: PostsService,
+    @Inject(forwardRef(() => PostsService)) private readonly postsService: PostsService,
   ) {}
 
   async create(postId: string, userId: string, dto: CreateReportDto) {
@@ -23,5 +23,10 @@ export class ReportsService {
       this.reportModel.create({ postId, userId, ...dto }),
       this.postsService.updateStats(postId, 'report', 1),
     ]);
+  }
+
+  async deleteByPostId(postId: string) {
+    if (!Types.ObjectId.isValid(postId)) throw new BadRequestException('Invalid post id');
+    return this.reportModel.deleteMany({ postId });
   }
 }

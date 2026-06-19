@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min, ValidateBy, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateBy, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TypeTag } from 'src/schemas/post/post.schema';
 import { CreateLocationDto } from './create-location.dto';
@@ -13,6 +13,7 @@ export class CreatePostDto {
 
   @IsNotEmpty()
   @IsString()
+  @MaxLength(500)
   message: string;
 
   @IsEnum(TypeTag)

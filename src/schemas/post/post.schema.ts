@@ -4,6 +4,7 @@ import { Location, LocationSchema } from './location.schema';
 import { Media, MediaSchema } from './media.schema';
 import { Stats, StatsSchema } from './stats.schema';
 import { PostUser, PostUserSchema } from './postuser.schema';
+import { MaxLength } from 'class-validator';
 
 export enum TypeTag {
     TIP = 'tip',

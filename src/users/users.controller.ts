@@ -1,11 +1,12 @@
-import { Controller, Get, Patch, Delete, Param, Body, NotFoundException, UseGuards } from '@nestjs/common';
-import mongoose from 'mongoose';
+import { Controller, Get, Patch, Delete, Param, Body, NotFoundException, UseGuards, Query } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ProfileCompleteGuard } from 'src/auth/guards/profile-complete.guard';
+import { PaginationDto } from 'src/common/dto/pagination.dto'
+import mongoose from 'mongoose';
 
 @Controller('users')
 export class UsersController {
@@ -21,13 +22,14 @@ export class UsersController {
 
   @Patch('me/complete-profile')
   @UseGuards(JwtAuthGuard)
-  completeProfile(@CurrentUser() user: { sub: string }, @Body() dto: CompleteProfileDto) {
+  async completeProfile(@CurrentUser() user: { sub: string }, @Body() dto: CompleteProfileDto) {
     return this.usersService.completeProfile(user.sub, dto);
   }
 
   @Get()
-  getUsers() {
-    return this.usersService.getUsers();
+  @UseGuards(JwtAuthGuard)
+  async getUsers(@Query() query: PaginationDto) {
+    return this.usersService.getUsers(query.page, query.limit);
   }
 
   @Get(':id')

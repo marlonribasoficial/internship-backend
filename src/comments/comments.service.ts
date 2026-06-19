@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, ForbiddenException, BadRequestException, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment } from '../schemas/comment/comment.schema';
@@ -12,7 +12,7 @@ export class CommentsService {
   constructor(
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     private readonly usersService: UsersService,
-    private readonly postsService: PostsService,
+    @Inject(forwardRef(() => PostsService)) private readonly postsService: PostsService,
   ) {}
 
   async create(postId: string, dto: CreateCommentDto, userId: string) {
@@ -42,9 +42,9 @@ export class CommentsService {
     return saved;
   }
 
-  async findByPost(postId: string) {
+  async findByPost(postId: string, page: number, limit: number) {
     if (!Types.ObjectId.isValid(postId)) throw new BadRequestException('Invalid post id');
-    return this.commentModel.find({ postId }).sort({ createdAt: 1 });
+    return this.commentModel.find({ postId }).sort({ createdAt: 1 }).skip((page - 1) * limit).limit(limit).lean();
   }
 
   async delete(commentId: string, userId: string) {
@@ -57,5 +57,10 @@ export class CommentsService {
     
     await this.postsService.updateStats(comment.postId.toString(), 'comment', -1);
     return this.commentModel.findByIdAndDelete(commentId);
+  }
+
+  async deleteByPostId(postId: string) {
+    if (!Types.ObjectId.isValid(postId)) throw new BadRequestException('Invalid post id');
+    return this.commentModel.deleteMany({ postId });
   }
 }

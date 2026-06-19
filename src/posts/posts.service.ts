@@ -4,12 +4,21 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../schemas/post/post.schema';
+import { Comment } from '../schemas/comment/comment.schema';
+import { Reaction } from '../schemas/reaction.schema';
+import { Report } from '../schemas/report.schema';
 import { Cron } from '@nestjs/schedule';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PostsService {
-  constructor(@InjectModel(Post.name) private readonly postModel: Model<Post>, private readonly usersService: UsersService) {}
+  constructor(
+    @InjectModel(Post.name) private readonly postModel: Model<Post>,
+    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
+    @InjectModel(Reaction.name) private readonly reactionModel: Model<Reaction>,
+    @InjectModel(Report.name) private readonly reportModel: Model<Report>,
+    private readonly usersService: UsersService,
+  ) {}
 
   async create(createPostDto: CreatePostDto, userId: string) {
     const user = await this.usersService.findById(userId);
@@ -79,6 +88,18 @@ export class PostsService {
     const post = await this.postModel.findById(id);
     if (!post) throw new NotFoundException(`Post with id ${id} not found`);
     if (post.user.id.toString() !== userId) throw new ForbiddenException('You can only delete your own posts');
-    return this.postModel.findByIdAndDelete(id);
+
+    await Promise.all([
+      this.postModel.findByIdAndDelete(id),
+      this.commentModel.deleteMany({ postId: id }),
+      this.reactionModel.deleteMany({ postId: id }),
+      this.reportModel.deleteMany({ postId: id }),
+    ]);
+  }
+
+  async updateStats(postId: string, type: 'like' | 'dislike' | 'comment' | 'report', increment: number) {
+    const fieldMap = { like: 'stats.likes', dislike: 'stats.dislikes', comment: 'stats.comments', report: 'stats.reports' };
+    const result = await this.postModel.updateOne({ _id: postId }, { $inc: { [fieldMap[type]]: increment } });
+    if (result.matchedCount === 0) throw new NotFoundException(`Post with id ${postId} not found`);
   }
 }

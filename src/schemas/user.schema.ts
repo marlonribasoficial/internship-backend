@@ -13,7 +13,7 @@ export class User {
   email?: string;
 
   @Prop()
-  hashedPassword: string;
+  hashedPassword?: string;
 
   @Prop({ type: String, default: null })
   appleId?: string | null;
@@ -43,11 +43,12 @@ UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
 UserSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    delete ret.hashedPassword;
-    delete ret.appleId;
-    delete ret.googleId;
-    delete ret.__v;
-    return ret;
+    const obj = ret as unknown as Record<string, unknown>;
+    delete obj.hashedPassword;
+    delete obj.appleId;
+    delete obj.googleId;
+    delete obj.__v;
+    return obj;
   },
 });
 

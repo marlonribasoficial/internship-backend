@@ -31,7 +31,7 @@ export class PostsService {
       .limit(limit);               // Pega apenas a quantidade solicitada
   }
 
-  @Cron('*/5 * * * * *')
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async recalcularScoresBackground() {
     console.log('Iniciando o recálculo do algoritmo de Trending...');
     const posts = await this.postModel.find();
@@ -44,11 +44,7 @@ export class PostsService {
         const dataCriacao = post.createdAt ? post.createdAt.getTime() : agora;
         const idadeEmHoras = (agora - dataCriacao) / (1000 * 60 * 60);
         const safeAge = Math.max(0, idadeEmHoras);
-        
-        // A CORREÇÃO ESTÁ AQUI: Puxando o caminho certo 'stats.likes'
         const likes = post.stats?.likes || 0; 
-        
-        // Atualiza a nota (que agora existe no Schema) e salva
         const novaNota = likes / Math.pow((safeAge + 2), gravity);
         
         // Atualiza SÓ a nota direto no banco, ignorando se o resto do post está incompleto

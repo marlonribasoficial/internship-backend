@@ -7,6 +7,7 @@ import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MapModule } from './map/map.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UsersModule,
     PostsModule,
     ScheduleModule.forRoot(),
+    MapModule,
   ],
   controllers: [AppController],
   providers: [AppService],
